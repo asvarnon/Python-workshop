@@ -15,9 +15,26 @@ DB_SERVICE = os.getenv('DB_SERVICE')
 dsn = cx_Oracle.makedsn(DB_HOST, DB_PORT, service_name=DB_SERVICE)
 connection = cx_Oracle.connect(user=DB_USER, password=DB_PASSWORD, dsn=dsn)
 
-def getData(table):
+# def getAllData(table):
+#     cursor = connection.cursor()
+#     cursor.execute(f"SELECT * FROM {table}")
+#     data = cursor.fetchall()
+#     cursor.close()
+#     return data
+
+def getData(table, columns="*", where=None, params=None):
+    # Whitelist allowed tables
+    allowed_tables = {"artisan", "player", "items", "primary_archetype", "player_artisan"}
+    if table not in allowed_tables:
+        raise ValueError("Table not allowed.")
+
+    query = f"SELECT {columns} FROM {table}"
+    if where:
+        query += f" WHERE {where}"
+
+    print(f"Executing query: \n {query} \n with params: {params}")
     cursor = connection.cursor()
-    cursor.execute(f"SELECT * FROM {table}")
+    cursor.execute(query, params or {})
     data = cursor.fetchall()
     cursor.close()
     return data
